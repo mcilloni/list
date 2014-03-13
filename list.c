@@ -15,17 +15,13 @@ struct list {
 
   struct node *current;
   size_t pos;  
-
-  bool isSlice;
 };
+
+void list_seek(List*,size_t);
 
 int64_t (*list_append)(List *list, const void *val) = (int64_t (*)(List*,const void*)) list_appendint;
 
 int64_t list_appendint(List *list, uintptr_t val) {
-
-  if (list->isSlice) {
-    return -1;
-  }
 
   if (!list->start) {
     list_pushint(list, val);
@@ -44,6 +40,54 @@ int64_t list_appendint(List *list, uintptr_t val) {
   return (list->len)++;
 }
 
+List* list_extract(List *list, size_t start, int64_t len) {
+
+  List *extract = list_new();
+
+  if (start < list->len) {
+    len = (len > list->len) ? (list->len - start) : len;
+    len = (len >= 0) ? len : (list->len - start);
+    list_seek(list, start);
+
+    struct node *prec = list->current->prec;
+    struct node **link1;
+    if (prec) {
+      link1 = &prec->succ;
+    } else {
+      link1 = &list->start;
+    }
+
+    extract->current = extract->start = extract->end = list->current;
+
+    list_seek(list, start + len - 1);
+
+    struct node *succ = list->current->succ;
+    struct node **link2;
+    if (succ) {
+      link2 = &succ->prec;
+    } else {
+      link2 = &list->end;
+    }
+
+    extract->end = list->current;
+
+    extract->len = len;
+
+    *link1 = succ;
+    *link2 = prec;
+
+    extract->start->prec = extract->end->succ = NULL;
+
+    list->len -= len;
+
+    list->current = list->start;
+    list->pos = 0LU;
+  }
+
+  return extract;
+
+}
+
 void node_free(struct node *node) {
   if (node) {
     node_free(node->succ);
@@ -52,9 +96,7 @@ void node_free(struct node *node) {
 }
 
 void list_free(List *list) {
-  if (!list->isSlice) {
-    node_free(list->start);
-  }
+  node_free(list->start);
 
   free(list);
 }
@@ -69,9 +111,7 @@ void node_freeAll(struct node *node, void (*freefunc)(void*)) {
 }
 
 void list_freeAll(List *list, void (*freefunc)(void*)) {
-  if (!list->isSlice) {
-    node_freeAll(list->start, freefunc);
-  }
+  node_freeAll(list->start, freefunc);
 
   free(list);
 }
@@ -84,16 +124,14 @@ void node_freeContents(struct node *node, void (*freefunc)(void*)) {
 }
 
 void list_freeContents(List *list, void (*freefunc)(void*)) {
-  if (!list->isSlice) {
-    node_freeContents(list->start, freefunc);
-  }
+  node_freeContents(list->start, freefunc);
 }
 
 void** (*list_get)(List *list, size_t pos) = (void** (*) (List*,size_t)) list_getint;
 
 void list_seekAhead(List *list, size_t pos) {
   
-  if (!list->current) {
+  if (!list->current || !pos) {
     list->current = list->start;
     list->pos = 0LU;
   }
@@ -106,7 +144,7 @@ void list_seekAhead(List *list, size_t pos) {
 
 void list_seekBehind(List *list, size_t pos) {
 
-  if(!list->current) {
+  if(!list->current || ((list->len - 1) == pos)) {
     list->current = list->end;
     list->pos = list->len - 1;
   }
@@ -174,10 +212,6 @@ uintptr_t list_popint(List *list) {
     return 0;
   }
 
-  if (list->isSlice) {
-    return 0;
-  }
-
   struct node *next = list->start->succ;
   uintptr_t ret = list->start->value;
 
@@ -195,20 +229,14 @@ uintptr_t list_popint(List *list) {
 }
 
 void list_prune(List *list) {
-  if (!list->isSlice) {
-    node_free(list->start);
-    memset(list, 0, sizeof *list);
-  }
+  node_free(list->start);
+  memset(list, 0, sizeof *list);
 }
 
 
 void (*list_push)(List *list, const void *val) = (void (*)(List*,const void*)) list_pushint;
 
 void list_pushint(List *list, uintptr_t val) {
-
-  if (list->isSlice) {
-    return;
-  }
 
   struct node *new = calloc(1, sizeof(struct node));
 
@@ -240,24 +268,3 @@ List* list_shallowCopy(List *list) {
   return new;
 }                                     
                                                  
-List* list_slice(List *list, size_t start, int64_t len) {
-
-  List *slice = list_new();
-  slice->isSlice = true;
-
-  if (start < list->len) {
-    len = (len > list->len) ? (list->len - start) : len;
-    len = (len >= 0) ? len : (list->len - start);
-    list_seek(list, start);
-    slice->current = slice->start = slice->end = list->current;
-    if (len > 1) {
-      list_seek(list, start + len - 1);
-      slice->end = list->current;
-    }
-
-    slice->len = len;
-  }
-
-  return slice;
-
-}

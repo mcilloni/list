@@ -31,25 +31,29 @@ int main(void) {
     list_appendint(list, i);
   }
 
+  fputs("list[] == ", stdout);
+
   printlist(list);
 
-  List *slice = list_slice(list, 3, 11);
+  List *extract = list_extract(list, 3, 11);
 
-  printlist(slice);
+  fputs("list[3:14] == ", stdout);
+  printlist(extract);
 
-  list_free(slice);
+  fputs("list[] == ", stdout);
+  printlist(list);
 
-  slice = list_slice(list, 12, -1);
+  list_free(extract);
 
-  printlist(slice);
+  extract = list_extract(list, 12, -1);
 
-  list_free(slice);
+  fputs("list[12:] == ", stdout);
+  printlist(extract);
 
-  slice = list_slice(list, 12, 100);
+  list_free(extract);
 
-  printlist(slice);
-
-  list_free(slice);
+  fputs("list[] == ", stdout);
+  printlist(list);
 
   list_free(list);
   return EXIT_SUCCESS;

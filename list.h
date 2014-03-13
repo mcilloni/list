@@ -8,6 +8,7 @@ typedef struct list List;
 
 extern int64_t (*list_append)(List *list, const void *val);
 int64_t list_appendint(List *list, uintptr_t val);
+List* list_extract(List *list, size_t start, int64_t len);
 void list_free(List *list);
 void list_freeAll(List *list, void (*freefunc)(void*));
 void list_freeContents(List *list, void (*freefunc)(void*));
@@ -23,6 +24,5 @@ void list_prune(List *list);
 extern void (*list_push)(List *list, const void *val);
 void list_pushint(List *list, uintptr_t val);
 List* list_shallowCopy(List* list);
-List* list_slice(List *list, size_t start, int64_t len);
 
 #endif
