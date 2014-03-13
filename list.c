@@ -19,6 +19,38 @@ struct list {
 
 void list_seek(List*,size_t);
 
+int64_t (*list_add)(List *list, size_t pos, const void *val) = (int64_t (*)(List*,size_t,const void*)) list_addint;
+
+int64_t list_addint(List *list, size_t pos, uintptr_t val) {
+  if (pos > list->len) {
+    return -1;
+  }
+
+  if (pos == list->len) {
+    return list_appendint(list, val);
+  }
+
+  list_seek(list, pos);
+
+  struct node *new = calloc(1, sizeof(struct node));
+  struct node *prec = list->current->prec;
+
+  if (prec) {
+    prec->succ = new;
+  }
+
+  new->prec = prec;
+  new->value = val;
+  new->succ = list->current;
+  list->current->prec = new;
+
+  list->current = (void*) (list->pos = 0);
+
+  ++list->len;
+
+  return pos;
+}
+
 int64_t (*list_append)(List *list, const void *val) = (int64_t (*)(List*,const void*)) list_appendint;
 
 int64_t list_appendint(List *list, uintptr_t val) {
@@ -156,6 +188,11 @@ void list_seekBehind(List *list, size_t pos) {
 }
 
 void list_seek(List *list, size_t pos) {
+  if (!list->current && !pos) {
+    list->current = list->start;
+    list->pos = 0;
+  }
+
   switch ((pos > list->pos) - (pos < list->pos)) {
   case 1:
     list_seekAhead(list, pos);

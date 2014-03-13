@@ -23,8 +23,6 @@ void printlist(List *list) {
 
 int main(void) {
 
-  srand(time(NULL));
-
   List *list = list_new();
 
   for (uint8_t i = 0; i < 31; ++i) {
@@ -51,6 +49,13 @@ int main(void) {
   printlist(extract);
 
   list_free(extract);
+ 
+  fputs("list[] == ", stdout); 
+  printlist(list);
+
+  puts("list[3] = 23");
+
+  list_addint(list, 3, 23);
 
   fputs("list[] == ", stdout);
   printlist(list);

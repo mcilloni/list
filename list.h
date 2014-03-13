@@ -6,6 +6,8 @@
 
 typedef struct list List;
 
+extern int64_t (*list_add)(List *list, size_t pos, const void *val);
+int64_t list_addint(List *list, size_t pos, uintptr_t val);
 extern int64_t (*list_append)(List *list, const void *val);
 int64_t list_appendint(List *list, uintptr_t val);
 List* list_extract(List *list, size_t start, int64_t len);
