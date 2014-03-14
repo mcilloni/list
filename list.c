@@ -4,16 +4,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct node {
-  struct node *prec,*succ;
+struct lnode {
+  struct lnode *prec,*succ;
   uintptr_t value;
 };
 
 struct list {
-  struct node *start, *end;
+  struct lnode *start, *end;
   size_t len;
 
-  struct node *current;
+  struct lnode *current;
   size_t pos;  
 };
 
@@ -32,8 +32,8 @@ int64_t list_addint(List *list, size_t pos, uintptr_t val) {
 
   list_seek(list, pos);
 
-  struct node *new = calloc(1, sizeof(struct node));
-  struct node *prec = list->current->prec;
+  struct lnode *new = calloc(1, sizeof(struct lnode));
+  struct lnode *prec = list->current->prec;
 
   if (prec) {
     prec->succ = new;
@@ -60,7 +60,7 @@ int64_t list_appendint(List *list, uintptr_t val) {
     return 1;
   }
   
-  struct node *new = calloc(1, sizeof(struct node));
+  struct lnode *new = calloc(1, sizeof(struct lnode));
 
   new->value = val;
 
@@ -81,8 +81,8 @@ List* list_extract(List *list, size_t start, int64_t len) {
     len = (len >= 0) ? len : (list->len - start);
     list_seek(list, start);
 
-    struct node *prec = list->current->prec;
-    struct node **link1;
+    struct lnode *prec = list->current->prec;
+    struct lnode **link1;
     if (prec) {
       link1 = &prec->succ;
     } else {
@@ -93,8 +93,8 @@ List* list_extract(List *list, size_t start, int64_t len) {
 
     list_seek(list, start + len - 1);
 
-    struct node *succ = list->current->succ;
-    struct node **link2;
+    struct lnode *succ = list->current->succ;
+    struct lnode **link2;
     if (succ) {
       link2 = &succ->prec;
     } else {
@@ -120,43 +120,43 @@ List* list_extract(List *list, size_t start, int64_t len) {
 
 }
 
-void node_free(struct node *node) {
-  if (node) {
-    node_free(node->succ);
-    free(node);
+void lnode_free(struct lnode *lnode) {
+  if (lnode) {
+    lnode_free(lnode->succ);
+    free(lnode);
   }
 }
 
 void list_free(List *list) {
-  node_free(list->start);
+  lnode_free(list->start);
 
   free(list);
 }
 
-void node_freeAll(struct node *node, void (*freefunc)(void*)) {
+void lnode_freeAll(struct lnode *lnode, void (*freefunc)(void*)) {
 
-  if (node) {
-    node_freeAll(node->succ, freefunc);
-    freefunc((void*) node->value);
-    free(node);
+  if (lnode) {
+    lnode_freeAll(lnode->succ, freefunc);
+    freefunc((void*) lnode->value);
+    free(lnode);
   }
 }
 
 void list_freeAll(List *list, void (*freefunc)(void*)) {
-  node_freeAll(list->start, freefunc);
+  lnode_freeAll(list->start, freefunc);
 
   free(list);
 }
 
-void node_freeContents(struct node *node, void (*freefunc)(void*)) {
-  if (node) {
-    node_freeContents(node->succ, freefunc);
-    freefunc((void*) node->value);
+void lnode_freeContents(struct lnode *lnode, void (*freefunc)(void*)) {
+  if (lnode) {
+    lnode_freeContents(lnode->succ, freefunc);
+    freefunc((void*) lnode->value);
   }
 }
 
 void list_freeContents(List *list, void (*freefunc)(void*)) {
-  node_freeContents(list->start, freefunc);
+  lnode_freeContents(list->start, freefunc);
 }
 
 void** (*list_get)(List *list, size_t pos) = (void** (*) (List*,size_t)) list_getint;
@@ -249,7 +249,7 @@ uintptr_t list_popint(List *list) {
     return 0;
   }
 
-  struct node *next = list->start->succ;
+  struct lnode *next = list->start->succ;
   uintptr_t ret = list->start->value;
 
   free(list->start);
@@ -266,7 +266,7 @@ uintptr_t list_popint(List *list) {
 }
 
 void list_prune(List *list) {
-  node_free(list->start);
+  lnode_free(list->start);
   memset(list, 0, sizeof *list);
 }
 
@@ -275,7 +275,7 @@ void (*list_push)(List *list, const void *val) = (void (*)(List*,const void*)) l
 
 void list_pushint(List *list, uintptr_t val) {
 
-  struct node *new = calloc(1, sizeof(struct node));
+  struct lnode *new = calloc(1, sizeof(struct lnode));
 
   new->succ = list->start;
   if (list->start) {
