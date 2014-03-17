@@ -10,14 +10,14 @@ int main(void) {
   List *list = list_new();
 
   list_appendint(list, 33);
-  printf("list[%lu] == %lu, len == %lu\n", 0LU, *list_getint(list, 0), list_len(list));
+  printf("list[%lu] == %lu, len == %zu\n", 0LU, *list_getint(list, 0), list_len(list));
 
 
   list_appendint(list, 0);
-  printf("list[%lu] == %lu, len == %lu\n", 1LU, *list_getint(list, 1), list_len(list));
+  printf("list[%lu] == %lu, len == %zu\n", 1LU, *list_getint(list, 1), list_len(list));
 
   list_appendint(list, 12);
-  printf("list[%lu] == %lu, len == %lu\n", 2LU, *list_getint(list, 2), list_len(list));
+  printf("list[%lu] == %lu, len == %zu\n", 2LU, *list_getint(list, 2), list_len(list));
 
   list_prune(list);
 
