@@ -1,6 +1,6 @@
-ifndef CC
+.if !defined(CC)
 	CC=clang
-endif
+.endif
 
 AR=ar
 RANLIB=ranlib
