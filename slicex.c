@@ -1,9 +1,9 @@
 #include "list.h"
 
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
 void printlist(List *list) {
   bool inside = false;
@@ -16,7 +16,7 @@ void printlist(List *list) {
       inside = true;
     }
 
-    printf("%lu", *list_getint(list, i));
+    printf("%" PRIuPTR, *list_getint(list, i));
   }
   puts(" ]");
 }
