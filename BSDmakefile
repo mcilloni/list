@@ -8,7 +8,7 @@ RANLIB=ranlib
 all: clean
 	$(CC) -c list.c -std=c11 -g -Wall -pedantic -fPIC
 	$(CC) -c pool.c -std=c11 -g -Wall -pedantic -fPIC
-	$(AR) -rc liblist.a list.o pool.o
+	$(AR) rc liblist.a list.o pool.o
 	$(RANLIB) liblist.a
 	$(CC) -o allocex allocex.c -std=c11 -L. -llist  -Wall -pedantic -g
 	$(CC) -o ex ex.c -std=c11 -L. -llist  -Wall -pedantic -g
