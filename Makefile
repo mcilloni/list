@@ -10,9 +10,23 @@ ifndef RANLIB
 	RANLIB=ranlib
 endif
 
-all: clean
-	$(CC) -c list.c -std=c11 -g -Wall -pedantic -fPIC
-	$(CC) -c pool.c -std=c11 -g -Wall -pedantic -fPIC
+ARCH = $(shell uname -m)
+UNAME = $(shell uname)
+
+FLAGS =
+
+ifeq ($(ARCH),x86_64)
+ifeq (,$(findstring CYGWIN,$(UNAME)))
+	FLAGS += -fPIC
+endif
+endif
+
+.PHONY: all,clean
+
+SRCS = $(wildcard *.c)
+OBJS = $(patsubst %.c,%.o,$(SRCS))
+
+all: $(OBJS)
 	$(AR) rc liblist.a list.o pool.o
 	$(RANLIB) liblist.a
 	$(CC) -o allocex allocex.c -std=c11 -L. -llist  -Wall -pedantic -g
@@ -22,8 +36,11 @@ all: clean
 	$(CC) -o strex strex.c -std=c11 -L. -llist  -Wall -pedantic -g
 	rm -f *.o
 
+%.o: %.c
+	$(CC) -c $< -o $@ -std=c11 -g -Wall -pedantic $(FLAGS)
+
 clean:
 	rm -f liblist.a
-	rm -f *.o
+	rm -f $(OBJS)
 	rm -f ex strex allocex slicex poolex
 
