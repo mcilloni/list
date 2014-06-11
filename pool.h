@@ -24,6 +24,10 @@
 
 #include "list.h"
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 typedef List Pool;
 
 extern Pool* (*pool_new)(void);
@@ -32,5 +36,9 @@ void* pool_alloc(Pool *pool, size_t size);
 void* pool_zalloc(Pool *pool, size_t size);
 
 extern void (*pool_release)(Pool *pool, void (*freefunc)(void*));
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif

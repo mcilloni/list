@@ -4,6 +4,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 typedef struct list List;
 
 extern int64_t (*list_add)(List *list, size_t pos, const void *val);
@@ -26,5 +30,9 @@ void list_prune(List *list);
 extern void (*list_push)(List *list, const void *val);
 void list_pushint(List *list, uintptr_t val);
 List* list_shallowCopy(List* list);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif
